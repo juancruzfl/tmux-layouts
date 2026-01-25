@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
 
-CANVAS_DIR="$HOME/.tmux-canvases"
+CANVAS_DIR="$HOME/.tmux/plugins/tmux-canvas/canvases"
 mkdir -p "$CANVAS_DIR"
 
 SESSION_NAME=$(tmux display-message -p '#S')
+
+if [ -z "$SESSION_NAME" ]; then
+    tmux display-message "Error: Could not determine session name"
+    exit 1
+fi
+
 TARGET_FILE="$CANVAS_DIR/${SESSION_NAME}.sh"
 
-echo "Saving state for session: $SESSION_NAME..."
+tmux display-message "Saving canvas for session: $SESSION_NAME..."
 
 cat <<EOF > "$TARGET_FILE"
 #!/usr/bin/env bash
@@ -16,19 +22,20 @@ cat <<EOF > "$TARGET_FILE"
 EOF
 
 tmux list-windows -t "$SESSION_NAME" -F '#I #W' | while read -r win_id win_name; do
-    if [ "$win_id" -ne 0 ]; then
-        echo "tmux new-window -t \"$SESSION_NAME\" -n \"$win_name\"" >> "$TARGET_FILE"
+    if [ "$win_id" -eq 0 ]; then
+        echo "tmux rename-window -t \"\$SESSION_NAME:0\" \"$win_name\"" >> "$TARGET_FILE"
     else
-        echo "tmux rename-window -t \"$SESSION_NAME:0\" \"$win_name\"" >> "$TARGET_FILE"
+        echo "tmux new-window -t \"\$SESSION_NAME\" -n \"$win_name\"" >> "$TARGET_FILE"
     fi
     
     tmux list-panes -t "$SESSION_NAME:$win_id" -F '#P #{pane_current_path}' | while read -r pane_id pane_path; do
         if [ "$pane_id" -ne 0 ]; then
-            echo "tmux split-window -t \"$SESSION_NAME:$win_id\" -c \"$pane_path\"" >> "$TARGET_FILE"
-            echo "tmux select-layout -t \"$SESSION_NAME:$win_id\" tiled" >> "$TARGET_FILE"
+            echo "tmux split-window -t \"\$SESSION_NAME:$win_id\" -c \"$pane_path\"" >> "$TARGET_FILE"
+            echo "tmux select-layout -t \"\$SESSION_NAME:$win_id\" tiled" >> "$TARGET_FILE"
         fi
     done
 done
 
 chmod +x "$TARGET_FILE"
-tmux display-message "Canvas saved to $TARGET_FILE"
+
+tmux display-message "✓ Canvas saved to $TARGET_FILE"
