@@ -260,8 +260,4 @@ Contributions are welcome! Please:
 ```bash
    tmux -L sandbox -f test/test.conf new-session -s "test-feature"
 ```
-4. Run the test suite:
-```bash
-   ./test/run-tests.sh
-```
 5. Submit a pull request
