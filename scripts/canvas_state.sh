@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-CANVAS_DIR="$HOME/.tmux/plugins/tmux-canvas/canvases"
+PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CANVAS_DIR="$PLUGIN_DIR/canvases"
+
 mkdir -p "$CANVAS_DIR"
 
 SESSION_NAME=$(tmux display-message -p '#S')
@@ -14,10 +16,12 @@ TARGET_FILE="$CANVAS_DIR/${SESSION_NAME}.sh"
 
 tmux display-message "Saving canvas for session: $SESSION_NAME..."
 
+CURRENT_DATE=$(date)
+
 cat <<EOF > "$TARGET_FILE"
 #!/usr/bin/env bash
-# Auto-generated Canvas for: $SESSION_NAME
-# Generated on: $(date)
+# Canvas: $SESSION_NAME
+# Saved on: $CURRENT_DATE
 
 EOF
 
@@ -36,6 +40,13 @@ tmux list-windows -t "$SESSION_NAME" -F '#I #W' | while read -r win_id win_name;
     done
 done
 
+cat <<EOF >> "$TARGET_FILE"
+
+# Return to first window
+tmux select-window -t "\$SESSION_NAME:0"
+tmux select-pane -t 0
+EOF
+
 chmod +x "$TARGET_FILE"
 
-tmux display-message "✓ Canvas saved to $TARGET_FILE"
+tmux display-message "Canvas saved to: $TARGET_FILE"
