@@ -7,6 +7,6 @@ mkdir -p "$CANVAS_DIR"
 
 export CANVAS_DIR
 
-tmux set-hook -g after-new-session "run-shell 'bash $CURRENT_DIR/scripts/session-init.sh #{session_name}'"
+tmux set-hook -g after-new-session "run-shell 'bash $CURRENT_DIR/scripts/session_init.sh #{session_name}'"
 
-tmux bind-key S run-shell "bash '$CURRENT_DIR/scripts/canvas-state.sh'"
+tmux bind-key S run-shell "bash '$CURRENT_DIR/scripts/canvas_state.sh'"
