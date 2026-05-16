@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-TEST_CANVAS_NAME="test-canvas"
+TEST_LAYOUT_NAME="test-layout"
 
 TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CANVAS_DIR="$TEST_DIR/../canvases/test-layout"
-TARGET_CANVAS="$CANVAS_DIR/$TEST_CANVAS_NAME.sh"
+LAYOUT_DIR="$TEST_DIR/../layouts/test-layout"
+TARGET_LAYOUt="$LAYOUt_DIR/$TEST_LAYOUT_NAME.sh"
 
-if [ -f "$TARGET_CANVAS" ]; then
-    echo "Canvas '$TEST_CANVAS_NAME' found at $TARGET_CANVAS"
+if [ -f "$TARGET_LAYOUT" ]; then
+    echo "Layout '$TEST_LAYOUT_NAME' found at $TARGET_LAYOUT"
     exit 0
 else
-    echo "FAIL: Canvas '$TEST_CANVAS_NAME' not found at $TARGET_CANVAS"
+    echo "FAIL: Layout '$TEST_LAYout_NAME' not found at $TARGET_LAYOUT"
     exit 1
 fi

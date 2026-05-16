@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CANVAS_DIR="$PLUGIN_DIR/canvases"
-mkdir -p "$CANVAS_DIR"
+LAYOUT_DIR="$PLUGIN_DIR/layouts"
+mkdir -p "$LAYOUT_DIR"
 
 SESSION_NAME=$(tmux display-message -p '#S')
 if [ -z "$SESSION_NAME" ]; then
@@ -10,14 +10,14 @@ if [ -z "$SESSION_NAME" ]; then
     exit 1
 fi
 
-TARGET_FILE="$CANVAS_DIR/${SESSION_NAME}.sh"
+TARGET_FILE="$LAYOUT_DIR/${SESSION_NAME}.sh"
 CURRENT_DATE=$(date '+%Y-%m-%d %H:%M:%S')
 
-tmux display-message "Capturing canvas for session: $SESSION_NAME..."
+tmux display-message "Capturing layout for session: $SESSION_NAME..."
 
 cat <<EOF > "$TARGET_FILE"
 #!/usr/bin/env bash
-# Canvas: $SESSION_NAME
+# LAYOUT: $SESSION_NAME
 # Captured on: $CURRENT_DATE
 #
 # Usage: source this file with SESSION_NAME set, or pass session name as \$1
@@ -93,4 +93,4 @@ tmux select-pane -t "\$SESSION_NAME:0.0"
 EOF
 
 chmod +x "$TARGET_FILE"
-tmux display-message "Canvas captured to: $TARGET_FILE"
+tmux display-message "Layout captured to: $TARGET_FILE"

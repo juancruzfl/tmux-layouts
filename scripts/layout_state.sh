@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CANVAS_DIR="$PLUGIN_DIR/canvases"
-mkdir -p "$CANVAS_DIR"
+LAYOUT_DIR="$PLUGIN_DIR/layouts"
+mkdir -p "$LAYOUT_DIR"
 
 SESSION_NAME=$(tmux display-message -p '#S')
 
@@ -11,9 +11,9 @@ if [ -z "$SESSION_NAME" ]; then
     exit 1
 fi
 
-TARGET_FILE="$CANVAS_DIR/${SESSION_NAME}.sh"
+TARGET_FILE="$LAYOUT_DIR/${SESSION_NAME}.sh"
 
-tmux display-message "Saving canvas for session: $SESSION_NAME..."
+tmux display-message "Saving layout for session: $SESSION_NAME..."
 
 CURRENT_DATE=$(date '+%Y-%m-%d %H:%M:%S')
 
@@ -21,7 +21,7 @@ FIRST_PANE_DIR=$(tmux display-message -p -t "$SESSION_NAME:0.0" '#{pane_current_
 
 cat <<EOF > "$TARGET_FILE"
 #!/usr/bin/env bash
-# Canvas: $SESSION_NAME
+# Layout: $SESSION_NAME
 # Saved on: $CURRENT_DATE
 
 PROJECT_DIR="$FIRST_PANE_DIR"
@@ -58,4 +58,4 @@ EOF
 
 chmod +x "$TARGET_FILE"
 
-tmux display-message "Canvas saved to: $TARGET_FILE"
+tmux display-message "Layout saved to: $TARGET_FILE"
