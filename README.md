@@ -1,6 +1,6 @@
-# tmux-canvas
+# tmux-layouts
 
-A tmux plugin for managing session layouts as reusable canvases.
+A tmux plugin for managing session layouts.
 
 ## Installation
 
@@ -8,7 +8,7 @@ A tmux plugin for managing session layouts as reusable canvases.
 
 1. Add to your `~/.tmux.conf`:
 ```bash
-set -g @plugin 'juancruzfl/tmux-canvas'
+set -g @plugin 'juancruzfl/tmux-layouts'
 ```
 
 2. Press `prefix + I` to install
@@ -22,12 +22,12 @@ tmux source-file ~/.tmux.conf
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/juancruzfl/tmux-canvas ~/.tmux/plugins/tmux-canvas
+git clone https://github.com/juancruzfl/tmux-layouts ~/.tmux/plugins/tmux-layouts
 ```
 
 2. Add to your `~/.tmux.conf`:
 ```bash
-run-shell ~/.tmux/plugins/tmux-canvas/tmux-canvas.tmux
+run-shell ~/.tmux/plugins/tmux-layouts/tmux-layouts.tmux
 ```
 
 3. Reload tmux config:
@@ -44,33 +44,33 @@ tmux show-hooks -g | grep after-new-session
 
 Should output:
 ```
-after-new-session  run-shell '/path/to/tmux-canvas/scripts/session-init.sh #{session_name}'
+after-new-session  run-shell '/path/to/tmux-layouts/scripts/session-init.sh #{session_name}'
 ```
 
 ## Usage
 
-### Creating Sessions with Canvases
+### Creating Session layouts
 
-Create a session with a canvas:
+Create a session layout:
 ```bash
 tmux new -s dev
 ```
 
 The plugin will:
-- Look for a predefined canvas at `~/.tmux/plugins/tmux-canvas/canvases/dev.sh`
-- Or look for a saved canvas at `~/.tmux-canvases/dev.sh`
-- Or create a new default canvas if neither exists
+- Look for a predefined layout at `~/.tmux/plugins/tmux-layouts/layouts/dev.sh`
+- Or look for a saved layout at `~/.tmux-layouts/dev.sh`
+- Or create a new default layout if neither exists
 
 ### Saving Your Current Layout
 
-Save your current session layout as a canvas:
+Save your current session layout:
 ```bash
 # Press: prefix + Shift+S (hold Shift and press S)
 ```
 
-**Note:** Lowercase `s` (`prefix + s`) is tmux's built-in session tree viewer and is NOT used by this plugin.
 
-Your canvas will be saved to `~/.tmux-canvases/<session-name>.sh`
+**Note:** Lowercase `s` (`prefix + s`) is tmux's built-in session tree viewer and is NOT used by this plugin.
+Your layout will be saved to `~/.tmux-layouts/<session-name>.sh`
 
 ### Custom Keybindings
 
@@ -78,18 +78,18 @@ Customize the save keybinding in your `~/.tmux.conf`:
 ```bash
 # Use a different key
 unbind S
-bind-key C run-shell "bash ~/.tmux/plugins/tmux-canvas/scripts/canvas-state.sh"
+bind-key C run-shell "bash ~/.tmux/plugins/tmux-layouts/scripts/layout-state.sh"
 
 # Or use without prefix (just Ctrl+s)
-bind-key -n C-s run-shell "bash ~/.tmux/plugins/tmux-canvas/scripts/canvas-state.sh"
+bind-key -n C-s run-shell "bash ~/.tmux/plugins/tmux-layouts/scripts/layout-state.sh"
 ```
 
-## Creating Custom Canvases
+## Creating Custom Layouts
 
-Create predefined canvases in `~/.tmux/plugins/tmux-canvas/canvases/`:
+Create predefined layouts in `~/.tmux/plugins/tmux-layouts/layouts/`:
 ```bash
 #!/usr/bin/env bash
-# Canvas: dev
+# Layout: dev
 # Development environment
 
 # Window 1: Code editor
@@ -107,9 +107,9 @@ tmux send-keys -t "$SESSION_NAME:servers" "npm run dev" C-m
 tmux select-window -t "$SESSION_NAME:0"
 ```
 
-Save this as `~/.tmux/plugins/tmux-canvas/canvases/dev.sh` and make it executable:
+Save this as `~/.tmux/plugins/tmux-layouts/layouts/dev.sh` and make it executable:
 ```bash
-chmod +x ~/.tmux/plugins/tmux-canvas/canvases/dev.sh
+chmod +x ~/.tmux/plugins/tmux-layouts/layouts/dev.sh
 ```
 
 Now `tmux new -s dev` will automatically load this layout!
@@ -122,8 +122,8 @@ To test the plugin without affecting your main tmux configuration, use the inclu
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/juancruzfl/tmux-canvas ~/Projects/tmux-canvas
-cd ~/Projects/tmux-canvas
+git clone https://github.com/juancruzfl/tmux-layouts ~/projects/tmux-layouts
+cd ~/projects/tmux-layouts
 ```
 
 2. Start a sandbox tmux session:
@@ -131,7 +131,7 @@ cd ~/Projects/tmux-canvas
 tmux -L sandbox -f test/test.conf new-session -s "plugin-test"
 ```
 
-The `-L sandbox` flag creates an isolated tmux server that won't interfere with your main tmux sessions.
+The `-L sandbox` flag creates an isolated tmux server that won't interfere with your main tmux sessions. Ensure the paths in the test.conf file keybindings match your current testing enviroment.  
 
 ### Test Configuration Features
 
@@ -155,51 +155,34 @@ tmux -L sandbox -f test/test.conf new-session -s "my-test"
 
 # 2. Inside the session:
 #    - Press prefix + 1 to create a test layout
-#    - Press prefix + Shift+S to save the canvas
-#    - Press prefix + L to list saved canvases
+#    - Press prefix + Shift+S to save the layout
+#    - Press prefix + L to list saved layouts
 #    - Press prefix + H to verify hooks
 
-# 3. Test canvas restoration
+# 3. Test layout restoration
 #    - Exit the session (type 'exit' or press Ctrl+d)
 #    - Recreate it: tmux -L sandbox -f test/test.conf new-session -s "my-test"
 #    - Your layout should be restored!
 
 # 4. Clean up when done
 tmux -L sandbox kill-server
-rm -rf ~/.tmux-canvases-test
+rm -rf ~/.tmux-layouts-test
 ```
 
-### Testing Different Canvases
+### Testing Different Layouts
 
-The test environment includes example canvases in `canvases/`:
+The test environment includes example layouts in `layouts/`:
 ```bash
-# Test the dev canvas
+# Test the dev layout
 tmux -L sandbox -f test/test.conf new-session -s "dev"
 
-# Test the simple canvas
+# Test the simple layout
 tmux -L sandbox -f test/test.conf new-session -s "simple"
-```
-
-### File Structure
-```
-tmux-canvas/
-├── README.md
-├── LICENSE
-├── tmux-canvas.tmux          # Main plugin file
-├── scripts/
-│   ├── session-init.sh       # Loads canvases on session creation
-│   ├── create-canvas.sh      # Creates new canvas templates
-│   └── canvas-state.sh       # Saves current session as canvas
-├── canvases/
-│   ├── dev.sh                # Example development canvas
-└── test/
-    ├── test.conf             # Sandbox tmux configuration
-    └── test_find_canvases.sh          # Tests for finding canvses
 ```
 
 ## Troubleshooting
 
-### Canvases aren't loading
+### Layouts aren't loading
 
 1. Check hook is set:
 ```bash
@@ -208,7 +191,7 @@ tmux show-hooks -g | grep after-new-session
 
 2. Verify permissions:
 ```bash
-ls -la ~/.tmux/plugins/tmux-canvas/tmux-canvas.tmux
+ls -la ~/.tmux/plugins/tmux-layouts/tmux-layouts.tmux
 # Should show: -rwxr-xr-x (executable)
 ```
 
@@ -219,18 +202,18 @@ tmux show-messages
 
 4. Manually test the init script:
 ```bash
-bash -x ~/.tmux/plugins/tmux-canvas/scripts/session-init.sh dev
+bash -x ~/.tmux/plugins/tmux-layouts/scripts/session-init.sh dev
 ```
 
-### Canvas save returns error 127
+### Layout save returns error 127
 
 This means the script file can't be found. Check:
 ```bash
+ls -la ~/.tmux/plugins/tmux-layouts/scripts/layout-state.sh
 # Verify the file exists and is executable
-ls -la ~/.tmux/plugins/tmux-canvas/scripts/canvas-state.sh
 
+chmod +x ~/.tmux/plugins/tmux-layouts/scripts/layout-state.sh
 # Make it executable if needed
-chmod +x ~/.tmux/plugins/tmux-canvas/scripts/canvas-state.sh
 ```
 
 ### Wrong keybinding triggered
