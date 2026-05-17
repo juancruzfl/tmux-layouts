@@ -122,8 +122,8 @@ To test the plugin without affecting your main tmux configuration, use the inclu
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/juancruzfl/tmux-layouts ~/Projects/tmux-layouts
-cd ~/Projects/tmux-layouts
+git clone https://github.com/juancruzfl/tmux-layouts ~/projects/tmux-layouts
+cd ~/projects/tmux-layouts
 ```
 
 2. Start a sandbox tmux session:
@@ -131,7 +131,7 @@ cd ~/Projects/tmux-layouts
 tmux -L sandbox -f test/test.conf new-session -s "plugin-test"
 ```
 
-The `-L sandbox` flag creates an isolated tmux server that won't interfere with your main tmux sessions.
+The `-L sandbox` flag creates an isolated tmux server that won't interfere with your main tmux sessions. Ensure the paths in the test.conf file keybindings match your current testing enviroment.  
 
 ### Test Configuration Features
 
