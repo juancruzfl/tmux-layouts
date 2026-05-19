@@ -10,87 +10,46 @@ if [ -z "$SESSION_NAME" ]; then
     exit 1
 fi
 
-TARGET_FILE="$LAYOUT_DIR/${SESSION_NAME}.sh"
 CURRENT_DATE=$(date '+%Y-%m-%d %H:%M:%S')
+TARGET_FILE="$LAYOUT_DIR/${SESSION_NAME}.sh"
 
-tmux display-message "Capturing layout for session: $SESSION_NAME..."
+tmux display-message "Saving layout for this session: $SESSION_NAME"
 
-cat <<EOF > "$TARGET_FILE"
+first_win_id=$(tmux list-windows -t "$SESSION_NAME" -F '#I' | head -1)
+
+cat > "$TARGET_FILE" <<EOF
 #!/usr/bin/env bash
-# LAYOUT: $SESSION_NAME
-# Captured on: $CURRENT_DATE
-#
-# Usage: source this file with SESSION_NAME set, or pass session name as \$1
-#   SESSION_NAME=mysession source ${SESSION_NAME}.sh
-#   bash ${SESSION_NAME}.sh mysession
-
-if [ -n "\$1" ]; then
-    SESSION_NAME="\$1"
-fi
-
-if [ -z "\$SESSION_NAME" ]; then
-    echo "Error: SESSION_NAME is not set."
-    exit 1
-fi
-
+# Layout $SESSION_NAME
+# Saved on: $CURRENT_DATE
 EOF
 
-tmux list-windows -t "$SESSION_NAME" -F '#I #W #{window_layout}' | \
-while IFS=' ' read -r win_id win_name win_layout; do
-
-    win_layout=$(tmux display-message -p -t "$SESSION_NAME:$win_id" '#{window_layout}')
-    win_dir=$(tmux display-message -p -t "$SESSION_NAME:${win_id}.0" '#{pane_current_path}')
-
-    if [ "$win_id" -eq 0 ]; then
-        cat <<EOF >> "$TARGET_FILE"
-# --- Window 0: $win_name ---
-tmux rename-window -t "\$SESSION_NAME:0" "$win_name"
-tmux send-keys -t "\$SESSION_NAME:0.0" "cd $win_dir" C-m
-
+while read -r window_id window_name window_panes window_layout; do
+    if [ "$window_id" -eq "$first_win_id" ]; then
+        cat >> "$TARGET_FILE" <<EOF
+tmux rename-window -t "\$SESSION_NAME:$window_id" "$window_name"
 EOF
-    else
-        cat <<EOF >> "$TARGET_FILE"
-# --- Window $win_id: $win_name ---
-tmux new-window -t "\$SESSION_NAME" -n "$win_name" -c "$win_dir"
-
+else
+    cat >> "$TARGET_FILE" <<EOF
+tmux new-window -t "\$SESSION_NAME" -n "$window_name"
 EOF
     fi
 
-    pane_count=$(tmux list-panes -t "$SESSION_NAME:$win_id" | wc -l)
-
-    if [ "$pane_count" -gt 1 ]; then
-        tmux list-panes -t "$SESSION_NAME:$win_id" \
-            -F '#P #{pane_current_path} #{pane_width} #{pane_height} #{pane_at_right} #{pane_at_bottom}' | \
-        while read -r pane_id pane_path pane_w pane_h at_right at_bottom; do
-
-            if [ "$pane_id" -eq 0 ]; then
-                continue
-            fi
-
-           if [ "$at_bottom" -eq 0 ]; then
-                split_flag="-v"   
-            else
-                split_flag="-h"  
-            fi
-
-            cat <<EOF >> "$TARGET_FILE"
-tmux split-window -t "\$SESSION_NAME:$win_id" $split_flag -c "$pane_path"
+    for (( i = 1; i < window_panes; i++ )); do
+        cat >> "$TARGET_FILE" <<EOF
+tmux split-window -t "\$SESSION_NAME:$window_id"
+tmux select-layout -t "\$SESSION_NAME:$window_id" tiled
 EOF
-        done
+    done
 
-        cat <<EOF >> "$TARGET_FILE"
-tmux select-layout -t "\$SESSION_NAME:$win_id" "$win_layout"
-
+    cat >> "$TARGET_FILE" <<EOF
+tmux select-layout -t "\$SESSION_NAME:$window_id" "$window_layout"
 EOF
-    fi
 
-done
+done < <(tmux list-windows -t "$SESSION_NAME" -F '#{window_index} #{window_name} #{window_panes} #{window_layout}')
 
-cat <<EOF >> "$TARGET_FILE"
-# Return focus to first window, first pane
-tmux select-window -t "\$SESSION_NAME:0"
-tmux select-pane -t "\$SESSION_NAME:0.0"
+cat >> "$TARGET_FILE" <<EOF
+tmux select-window -t "\$SESSION_NAME:$first_win_id"
 EOF
 
 chmod +x "$TARGET_FILE"
-tmux display-message "Layout captured to: $TARGET_FILE"
+tmux display-message "Layout captured at: $TARGET_FILE"

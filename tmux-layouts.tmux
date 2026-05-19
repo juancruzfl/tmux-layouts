@@ -9,4 +9,4 @@ export LAYOUT_DIR
 
 tmux set-hook -g after-new-session "run-shell 'bash $CURRENT_DIR/scripts/session_init.sh #{session_name}'"
 
-tmux bind-key S run-shell "bash '$CURRENT_DIR/scripts/layout_state.sh'"
+tmux bind-key S run-shell "bash '$CURRENT_DIR/scripts/capture_layout.sh'"
